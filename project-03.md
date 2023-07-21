@@ -130,3 +130,66 @@ start server to see if it works
 
 ![confirming server has started](./images/install_expressjs/starting_server.png)
 
+edit inbound rules in AWS console and open port 5000
+
+![opening TCP port 5000](./images/install_expressjs/editing_inbound_rules.png)
+
+Open up your browser and try to access your server’s Public IP or Public DNS name followed by port 5000
+
+![accessing server with browser on port 5000](./images/install_expressjs/opening_browser_on_port5000.png)
+
+Routes
+There are three actions that our To-Do application needs to be able to do:
+
+Create a new task
+Display list of all tasks
+Delete a completed task
+Each task will be associated with some particular endpoint and will use different standard HTTP request methods: POST, GET, DELETE.
+
+For each task, we need to create routes that will define various endpoints that the To-do app will depend on. So let us create a folder routes
+
+`mkdir routes`
+
+![creating routes directory](./images/install_expressjs/creating_routes_directory.png)
+
+change to routes directory
+
+`cd routes`
+
+![changing to routes directory](./images/install_expressjs/changing_to_routes_directory.png)
+
+create a file api.js
+
+`touch api.js`
+
+![creating api.js file](./images/install_expressjs/creating_api.js_file.png)
+
+open api.js file with vim and paste configuration below
+
+
+const express = require ('express');
+const router = express.Router();
+
+router.get('/todos', (req, res, next) => {
+
+});
+
+router.post('/todos', (req, res, next) => {
+
+});
+
+router.delete('/todos/:id', (req, res, next) => {
+
+})
+
+module.exports = router;
+
+
+`vim api.js`
+
+
+
+
+
+
+
