@@ -408,3 +408,32 @@ I encountered an error here. Solution is to open index.js file and change the po
 
 ![starting server](./images/mongodb_database/starting_server.png)
 
+Testing Backend Code without Frontend using RESTful API
+So far we have written backend part of our To-Do application, and configured a database, but we do not have a frontend UI yet. We need ReactJS code to achieve that. But during development, we will need a way to test our code using RESTfull API. Therefore, we will need to make use of some API development client to test our code.
+
+In this project, we will use Postman to test our API.
+
+INSTALL POSTMAN
+
+[installing postman](https://www.getpostman.com/downloads/)
+
+You should test all the API endpoints and make sure they are working. For the endpoints that require body, you should send JSON back with the necessary fields since it’s what we setup in our code.
+
+Now open your Postman, create a POST request to the API http://<PublicIP-or-PublicDNS>:5001/api/todos. This request sends a new task to our To-Do list so the application could store it in the database.
+
+Note: make sure your set header key Content-Type as application/json
+
+Now create  POST request and see corresponding GET request to the API on postman:   http://<PublicIP-or-PublicDNS>:5001/api/todos 
+
+[post request]( http://18.185.129:5001:5000/api/todos)
+
+![post request on postman](./images/mongodb_database/post_request.png)
+
+![Get request on postman](./images/mongodb_database/get_request.png)
+
+
+
+
+
+
+
