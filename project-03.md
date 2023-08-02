@@ -432,8 +432,458 @@ Now create  POST request and see corresponding GET request to the API on postman
 ![Get request on postman](./images/mongodb_database/get_request.png)
 
 
+FRONTEND CREATION
+
+Since we are done with the functionality we want from our backend and API, it is time to create a user interface for a Web client (browser) to interact with the application via API. To start out with the frontend of the To-do app, we will use the create-react-app command to scaffold our app.
+
+In the same root directory as your backend code, which is the Todo directory, run:
+
+`npx create-react-app client`
+
+This will create a new folder in your Todo directory called client, where you will add all the react code
+
+![creating react app client](./images/frontend_creation/creating_react_app_client_page1.png)
+
+![creating react app client](./images/frontend_creation/creating_react_app_client_page2.png)
+
+Running a React App
+Before testing the react app, there are some dependencies that need to be installed.
+
+Install concurrently. It is used to run more than one command simultaneously from the same terminal window.
+
+`npm install concurrently --save-dev`
+
+![installing concurrently dependency](./images/frontend_creation/installing_concurrently_dependency.png)
+
+Install nodemon. It is used to run and monitor the server. If there is any change in the server code, nodemon will restart it automatically and load the new changes
+
+`npm install nodemon --save-dev`
+
+![installing dependency nodemon](./images/frontend_creation/installing_nodemon_dependency.png)
+
+In Todo folder open the package.json file. Change the highlighted part of the below screenshot and replace with the code below.
+
+
+"scripts": {
+"start": "node index.js",
+"start-watch": "nodemon index.js",
+"dev": "concurrently \"npm run start-watch\" \"cd client && npm start\""
+},
+
+
+
+![highlighted part](./images/frontend_creation/highlighted_part.png)
+
+![changing highlighted part in package.json file](./images/frontend_creation/changing_highlighted_part_package.json.png)
+
+
+Configure Proxy in package.json
+Change directory to ‘client’
+
+`cd client`
+
+![changing to client directory](./images/frontend_creation/changing_to_client_directory.png)
+
+Open package.json file and add key value pair     "proxy": "http://localhost:5000"
+
+`vi package.json`
+
+![adding key value pair](./images/frontend_creation/adding_key_value_pair.png)
+
+The whole purpose of adding the proxy configuration above is to make it possible to access the application directly from the browser by simply calling the server url like http://localhost:5000 rather than always including the entire path like http://localhost:5000/api/todos
+
+Change to Todo directory and run command 'npm run dev'
+
+`cd ..`
+
+`npm run dev`
+
+![npm run dev response](./images/frontend_creation/npm_run_dev_page1.png)
+
+![npm rub dev response](./images/frontend_creation/npm_run_dev_page2.png)
+
+In order to be able to access the application from the Internet you have to open TCP port 3000 on EC2 by adding a new Security Group rule. 
+
+![opening TCP port 3000](./images/frontend_creation/opening_TCP_port_3000.png)
+
+access webpage in browser
+
+[webpage opened in port 3000](http://3.120.189.234:3000)
+
+![webpage opened in port 3000 showing react up and running](./images/frontend_creation/webpage_opened_in_port_3000.png)
+
+One of the advantages of react is that it makes use of components, which are reusable and also makes code modular. For our Todo app, there will be two stateful components and one stateless component.
+From your Todo directory run
+
+`cd client`
+
+`cd src`
+
+Inside your src folder create another folder called components
+
+`mkdir components`
+
+change to components directory
+
+`cd components`
+
+Inside ‘components’ directory create three files Input.js, ListTodo.js and Todo.js.
+
+`touch Input.js ListTodo.js Todo.js`
+
+Open Input.js file
+
+`vi Input.js`
+
+Copy and paste the following configuration
+
+import React, { Component } from 'react';
+import axios from 'axios';
+
+class Input extends Component {
+
+state = {
+action: ""
+}
+
+addTodo = () => {
+const task = {action: this.state.action}
+
+    if(task.action && task.action.length > 0){
+      axios.post('/api/todos', task)
+        .then(res => {
+          if(res.data){
+            this.props.getTodos();
+            this.setState({action: ""})
+          }
+        })
+        .catch(err => console.log(err))
+    }else {
+      console.log('input field required')
+    }
+
+}
+
+handleChange = (e) => {
+this.setState({
+action: e.target.value
+})
+}
+
+render() {
+let { action } = this.state;
+return (
+<div>
+<input type="text" onChange={this.handleChange} value={action} />
+<button onClick={this.addTodo}>add todo</button>
+</div>
+)
+}
+}
+
+export default Input
+
+
+![Input.js code](./images/frontend_creation/input.js_configuration_file.png)
+
+To make use of Axios, which is a Promise based HTTP client for the browser and node.js, you need to cd into your client from your terminal and run yarn add axios or npm install axios.
+
+Move to the src folder
+
+`cd ..`
+
+Move to clients folder
+
+`cd ..`
+
+Install Axios
+
+`npm install axios`
+
+![Axios installation](./images/frontend_creation/installing_axios.png)
+
+move to components directory
+
+`cd src/components`
+
+Open ListTodo.js and paste configuration file below:
+
+
+
+import React from 'react';
+
+const ListTodo = ({ todos, deleteTodo }) => {
+
+return (
+<ul>
+{
+todos &&
+todos.length > 0 ?
+(
+todos.map(todo => {
+return (
+<li key={todo._id} onClick={() => deleteTodo(todo._id)}>{todo.action}</li>
+)
+})
+)
+:
+(
+<li>No todo(s) left</li>
+)
+}
+</ul>
+)
+}
+
+export default ListTodo
+
+
+
+`vi ListTodo.js`
+
+![ListTodo.js configuration file](./images/frontend_creation/ListTodo.js_configuration.png)
+
+
+in your Todo.js file you write the following code:
+
+
+
+import React, {Component} from 'react';
+import axios from 'axios';
+
+import Input from './Input';
+import ListTodo from './ListTodo';
+
+class Todo extends Component {
+
+state = {
+todos: []
+}
+
+componentDidMount(){
+this.getTodos();
+}
+
+getTodos = () => {
+axios.get('/api/todos')
+.then(res => {
+if(res.data){
+this.setState({
+todos: res.data
+})
+}
+})
+.catch(err => console.log(err))
+}
+
+deleteTodo = (id) => {
+
+    axios.delete(`/api/todos/${id}`)
+      .then(res => {
+        if(res.data){
+          this.getTodos()
+        }
+      })
+      .catch(err => console.log(err))
+
+}
+
+render() {
+let { todos } = this.state;
+
+    return(
+      <div>
+        <h1>My Todo(s)</h1>
+        <Input getTodos={this.getTodos}/>
+        <ListTodo todos={todos} deleteTodo={this.deleteTodo}/>
+      </div>
+    )
+
+}
+}
+
+export default Todo;ls
+
+
+
+`vi Todo.js`
+
+![Todo.js configuration file](./images/frontend_creation/Todo.js_configuration.png)
+
+make little adjustment to our react code. Delete the logo and adjust our App.js
+
+ move to src folder
+
+ `cd ..`
+
+
+ `vi App.js`
+
+replace the code there with the code below:
+
+
+
+import React from 'react';
+
+import Todo from './components/Todo';
+import './App.css';
+
+const App = () => {
+return (
+<div className="App">
+<Todo />
+</div>
+);
+}
+
+export default App;
+
+
+
+![App.js code](./images/frontend_creation/App.js_code.png)
+
+
+Open App.css and replace code there with the code below:
+
+
+
+.App {
+text-align: center;
+font-size: calc(10px + 2vmin);
+width: 60%;
+margin-left: auto;
+margin-right: auto;
+}
+
+input {
+height: 40px;
+width: 50%;
+border: none;
+border-bottom: 2px #101113 solid;
+background: none;
+font-size: 1.5rem;
+color: #787a80;
+}
+
+input:focus {
+outline: none;
+}
+
+button {
+width: 25%;
+height: 45px;
+border: none;
+margin-left: 10px;
+font-size: 25px;
+background: #101113;
+border-radius: 5px;
+color: #787a80;
+cursor: pointer;
+}
+
+button:focus {
+outline: none;
+}
+
+ul {
+list-style: none;
+text-align: left;
+padding: 15px;
+background: #171a1f;
+border-radius: 5px;
+}
+
+li {
+padding: 15px;
+font-size: 1.5rem;
+margin-bottom: 15px;
+background: #282c34;
+border-radius: 5px;
+overflow-wrap: break-word;
+cursor: pointer;
+}
+
+@media only screen and (min-width: 300px) {
+.App {
+width: 80%;
+}
+
+input {
+width: 100%
+}
+
+button {
+width: 100%;
+margin-top: 15px;
+margin-left: 0;
+}
+}
+
+@media only screen and (min-width: 640px) {
+.App {
+width: 60%;
+}
+
+input {
+width: 50%;
+}
+
+button {
+width: 30%;
+margin-left: 10px;
+margin-top: 0;
+}
+}
+
+
+`vi App.css`
+
+![App.css code page1](./images/frontend_creation/App.css_code_page1.png)
+
+![App.css code page2](./images/frontend_creation/App.css_code_page2.png)
+
+Open index.css and replace code there with code below:
 
 
 
 
+body {
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+"Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+box-sizing: border-box;
+background-color: #282c34;
+color: #787a80;
+}
+
+code {
+font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+monospace;
+}
+
+
+
+`vi index.css`
+
+![index.css code](./images/frontend_creation/index.css_code.png)
+
+Go to Todo directory
+
+`cd../..`
+
+run npm run dev
+
+`npm run dev`
+
+![npm run dev response](./images/frontend_creation/final_npm_run_dev_response.png)
+
+Access todo application on browser
+
+![Todo application on browser](./images/frontend_creation/accessing_todo_appliocation_on_browser.png)
+
+END OF PROJECT!
 
